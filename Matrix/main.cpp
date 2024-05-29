@@ -1,6 +1,8 @@
 #include<iostream>
 using namespace std;
 
+class Matrix;
+void FillRand(Matrix& obj,int minrand=0,int maxrand=0);
 class Matrix
 {
 	int rows;
@@ -8,23 +10,35 @@ class Matrix
 	int** matrix;
 
 public:
-
+	int Get_rows() const
+	{
+		return rows;
+	}
+	int Get_cols()const
+	{
+		return cols;
+	}
 	Matrix(int rows = 2, int cols = 2): rows(rows), cols(cols), matrix(new int* [rows])
 	{
 		for (int i = 0; i < rows; i++) matrix[i] = new int[cols] {};
 		cout << "Constructor" << "\t" << this << endl;
 	}
-
+	Matrix(int cols) :Matrix(1, cols)
+	{
+		cout << "1ArgConstructor" << "\t" << endl;
+	}
 	Matrix(const Matrix& other): Matrix(other.rows,other.cols)
 	{
-		/*for (int i = 0; i < rows; i++)
-		{
-			for (int j = 0; j < cols; j++) this->matrix[i][j] = other.matrix[i][j];
-		}*/
 		*this = other;
 		cout << "CopyConstructor" << "\t" << this << endl;
 	}
-
+	Matrix(Matrix&& other): matrix(other.matrix), rows(other.rows), cols(other.cols)
+	{
+		other.matrix = nullptr;
+		other.rows = 0;
+		other.cols = 0;
+		cout << "MoveConstructor" << "\t" << this << endl;
+	}
 
 
 
@@ -54,29 +68,57 @@ public:
 		return *this;
 	}
 
-	/*Matrix& operator=(Matrix&& other)
+	Matrix& operator=(Matrix&& other)
 	{
 		if (this == &other)return *this;
 		this->~Matrix();
+		this->matrix = other.matrix;
+		this->rows = other.rows;
+		this->cols = other.cols;
+		other.matrix = nullptr;
+		other.rows = 0;
+		other.cols = 0;
+		cout << "MoveAssignment" << "\t" << this << endl;
+		return *this;
 
-	}*/
+	}
+	const int* operator[](int i)const
+	{
+		return matrix[i];
+	}
+	int* operator[](int i)
+	{
+		return matrix[i];
+	}
 
-
-	void print()
+	std::ostream& print(std::ostream& os = std::cout)const
 	{
 		for (int i = 0; i < rows; i++)
 		{
-			for (int j = 0; j < cols; j++) cout << matrix[i][j] << "\t";
-			cout << endl;
+			for (int j = 0; j < cols; j++) os << matrix[i][j] << "\t";
+			os << endl;
 		}
-
+		return os;
 	}
 
 };
 
+std::ostream& operator<<(std::ostream& os, const Matrix& obj)
+{
+	return obj.print(os);
+}
 
-
-
+Matrix operator+(const Matrix& Left, const Matrix& Right)
+{
+	Matrix Sum(Left.Get_rows(), Left.Get_cols());
+	for (int i = 0; i < Sum.Get_rows(); i++) for (int j = 0; j < Sum.Get_cols(); j++) Sum[i][j] = Left[i][j] + Right[i][j];
+	return Sum;
+}
+bool operator==(const Matrix& Left, const Matrix& Right)
+{
+	if (Left.Get_rows() * Right.Get_cols() != Right.Get_rows() * Left.Get_cols())return false;
+	fo
+}
 
 
 
@@ -86,14 +128,29 @@ void main()
 	setlocale(LC_ALL, "");
 
 	Matrix A(3, 3);
-	Matrix B(3, 3); B = A;
-	B.print();
-
+	FillRand(A, 1, 10);
+	cout << A << endl;
+	Matrix B(3, 3);
+	FillRand(B, 3, 9);
+	cout << B << endl;
+	Matrix C = A + B;
+	cout << C << endl;
 
 
 
 }
 
+void FillRand(Matrix& obj, int minrand, int maxrand)
+{
+	if (minrand > maxrand)
+	{
+		int bufer = maxrand; maxrand = minrand; minrand = bufer;
+	}
+	for (int i = 0; i < obj.Get_rows(); i++)
+	{
+		for (int j = 0; j < obj.Get_cols(); j++) obj[i][j] = rand() % (maxrand-minrand)+minrand;
+	}
+}
 
 
 
