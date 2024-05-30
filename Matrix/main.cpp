@@ -137,12 +137,20 @@ Matrix operator+(const Matrix& Left, const Matrix& Right)
 }
 bool operator==(const Matrix& Left, const Matrix& Right)
 {
-	if (!Left.dimension(Right)) return false;
+	if (!Left.dimension(Right))
+	{
+		cerr << "Ошибка, матрицы разных размеров " << endl;
+		return false;
+	}
 	for (int i = 0; i < Left.Get_rows(); i++) for (int j = 0; j < Left.Get_cols(); j++) if (Left[i][j] != Right[i][j]) return false;
 	return true;
 }bool operator!=(const Matrix& Left, const Matrix& Right)
 {
-	if (!Left.dimension(Right)) return false;
+	if (!Left.dimension(Right))
+	{
+		cerr << "Ошибка, матрицы разных размеров " << endl;
+		return false;
+	}
 	return !(Left == Right);
 }
 
@@ -153,7 +161,7 @@ void main()
 {
 	setlocale(LC_ALL, "");
 
-	Matrix A(3, 3);
+	Matrix A(3, 2);
 	FillRand(A, 1, 10);
 	cout << A << endl;
 	Matrix B(3, 3);
