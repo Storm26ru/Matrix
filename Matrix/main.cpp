@@ -18,6 +18,7 @@ public:
 	{
 		return cols;
 	}
+	//					Constructors
 	Matrix(int rows = 2, int cols = 2): rows(rows), cols(cols), matrix(new int* [rows])
 	{
 		for (int i = 0; i < rows; i++) matrix[i] = new int[cols] {};
@@ -51,7 +52,7 @@ public:
 		cols = 0;
 		cout << "Destructor" <<"\t"<<this << endl;
 	}
-
+	//					Operators
 	Matrix& operator=(const Matrix& other)
 	{
 		if (this == &other)return *this;
@@ -100,6 +101,11 @@ public:
 		}
 		return os;
 	}
+	//					Methods
+	bool dimension(const Matrix& other)const
+	{
+		return rows * other.Get_cols() == other.Get_rows() * cols;
+	}
 
 };
 
@@ -110,14 +116,34 @@ std::ostream& operator<<(std::ostream& os, const Matrix& obj)
 
 Matrix operator+(const Matrix& Left, const Matrix& Right)
 {
+	if (!Left.dimension(Right))
+	{
+		cerr << "Ошибка, матрицы разных размеров " << endl;
+		return Matrix();
+	}
 	Matrix Sum(Left.Get_rows(), Left.Get_cols());
 	for (int i = 0; i < Sum.Get_rows(); i++) for (int j = 0; j < Sum.Get_cols(); j++) Sum[i][j] = Left[i][j] + Right[i][j];
 	return Sum;
+}Matrix operator-(const Matrix& Left, const Matrix& Right)
+{
+	if (!Left.dimension(Right))
+	{
+		cerr << "Ошибка, матрицы разных размеров " << endl;
+		return Matrix();
+	}
+	Matrix Difference(Left.Get_rows(), Left.Get_cols());
+	for (int i = 0; i < Difference.Get_rows(); i++) for (int j = 0; j < Difference.Get_cols(); j++) Difference[i][j] = Left[i][j] - Right[i][j];
+	return Difference;
 }
 bool operator==(const Matrix& Left, const Matrix& Right)
 {
-	if (Left.Get_rows() * Right.Get_cols() != Right.Get_rows() * Left.Get_cols())return false;
-	fo
+	if (!Left.dimension(Right)) return false;
+	for (int i = 0; i < Left.Get_rows(); i++) for (int j = 0; j < Left.Get_cols(); j++) if (Left[i][j] != Right[i][j]) return false;
+	return true;
+}bool operator!=(const Matrix& Left, const Matrix& Right)
+{
+	if (!Left.dimension(Right)) return false;
+	return !(Left == Right);
 }
 
 
@@ -133,8 +159,9 @@ void main()
 	Matrix B(3, 3);
 	FillRand(B, 3, 9);
 	cout << B << endl;
-	Matrix C = A + B;
+	Matrix C = A - B;
 	cout << C << endl;
+	cout << (A != B) << endl;
 
 
 
