@@ -135,6 +135,18 @@ Matrix operator+(const Matrix& Left, const Matrix& Right)
 	for (int i = 0; i < Difference.Get_rows(); i++) for (int j = 0; j < Difference.Get_cols(); j++) Difference[i][j] = Left[i][j] - Right[i][j];
 	return Difference;
 }
+Matrix operator*(const Matrix& Left, const Matrix& Right)
+{
+	if (Left.Get_cols() != Right.Get_rows())
+	{
+		cerr<<"Ошибка,число столбцов первой матрицы не равно числу строк второй матрицы"<<endl;
+		return Matrix();
+	}
+	Matrix Multiplication(Left.Get_rows(), Right.Get_cols());
+	for (int i = 0; i < Multiplication.Get_rows(); i++) for (int j = 0; j < Right.Get_cols(); j++) for (int k = 0; k < Left.Get_cols(); k++)
+		Multiplication[i][j] += Left[i][k] * Right[k][j];
+	return Multiplication;
+}
 bool operator==(const Matrix& Left, const Matrix& Right)
 {
 	if (!Left.dimension(Right))
@@ -162,14 +174,14 @@ void main()
 	setlocale(LC_ALL, "");
 
 	Matrix A(3, 2);
-	FillRand(A, 1, 10);
+	FillRand(A, 1, 5);
 	cout << A << endl;
-	Matrix B(3, 3);
-	FillRand(B, 3, 9);
+	Matrix B(2, 3);
+	FillRand(B, 2, 3);
 	cout << B << endl;
-	Matrix C = A - B;
+	Matrix C = A * B;
 	cout << C << endl;
-	cout << (A != B) << endl;
+	//cout << (A != B) << endl;
 
 
 
