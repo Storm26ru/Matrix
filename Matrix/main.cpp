@@ -2,7 +2,20 @@
 using namespace std;
 
 class Matrix;
-void FillRand(Matrix& obj,int minrand=0,int maxrand=0);
+void FillRand(Matrix& obj,int minrand=0,int maxrand=10);
+Matrix operator+(const Matrix& Left, const Matrix& Right);
+Matrix operator-(const Matrix& Left, const Matrix& Right);
+Matrix operator*(const Matrix& Left, const Matrix& Right);
+
+void Print(double**& matrix, int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < n; j++) cout << matrix[i][j] << "\t";
+		cout << endl;
+	}
+}
+
 class Matrix
 {
 	int rows;
@@ -18,8 +31,10 @@ public:
 	{
 		return cols;
 	}
+
 	//					Constructors
-	Matrix(int rows = 2, int cols = 2): rows(rows), cols(cols), matrix(new int* [rows])
+
+	Matrix(int rows=2, int cols=2): rows(rows), cols(cols), matrix(new int* [rows])
 	{
 		for (int i = 0; i < rows; i++) matrix[i] = new int[cols] {};
 		cout << "Constructor" << "\t" << this << endl;
@@ -52,7 +67,9 @@ public:
 		cols = 0;
 		cout << "Destructor" <<"\t"<<this << endl;
 	}
+
 	//					Operators
+
 	Matrix& operator=(const Matrix& other)
 	{
 		if (this == &other)return *this;
@@ -91,6 +108,19 @@ public:
 	{
 		return matrix[i];
 	}
+	Matrix& operator+=(const Matrix& other)
+	{
+		return *this = *this + other;
+	}
+	Matrix& operator-=(const Matrix& other)
+	{
+		return *this = *this - other;
+	}
+	Matrix& operator*=(const Matrix& other)
+	{
+		return *this = *this * other;
+	}
+
 
 	std::ostream& print(std::ostream& os = std::cout)const
 	{
@@ -101,13 +131,54 @@ public:
 		}
 		return os;
 	}
+
 	//					Methods
+
 	bool dimension(const Matrix& other)const
 	{
 		return rows * other.Get_cols() == other.Get_rows() * cols;
 	}
 
+	double determinant()
+	{
+		double det = 1;
+		if (rows != cols) 
+		{
+			cerr << "Ошибка, определитель можно вычислить только для квадратной матрицы " << endl;
+			return det = 0;
+		}
+		double** matrix = new double* [rows]; 
+		for (int i = 0; i < rows; i++) matrix[i] = new double[cols] {};
+		for (int i = 0; i < rows; i++) for (int j = 0; j < cols; j++) matrix[i][j] = this->matrix[i][j];
+		for (int k = 0; k < cols - 1; k++)
+		{
+
+			for (int i = k + 1; i < rows; i++)
+			{
+				double mul = 0;
+				for (int j = k; j < cols; j++)
+				{
+					if (j == k) mul = -matrix[i][j] / matrix[k][j];
+					matrix[i][j] += matrix[k][j] * mul;
+				}
+				if (matrix[i][i] == 0)
+				{
+
+				return det = 0;
+				}
+
+			}
+		}
+		Print(matrix, rows);
+
+		for (int i = 0; i < rows; i++) det *= matrix[i][i];
+		for (int i = 0; i < rows; i++) delete[] matrix[i];
+		delete[] matrix;
+		return det;
+	}
+
 };
+
 
 std::ostream& operator<<(std::ostream& os, const Matrix& obj)
 {
@@ -173,14 +244,18 @@ void main()
 {
 	setlocale(LC_ALL, "");
 
-	Matrix A(3, 2);
-	FillRand(A, 1, 5);
+	Matrix A(3, 3);
+	FillRand(A,1,5);
 	cout << A << endl;
-	Matrix B(2, 3);
+	//Matrix S;
+	//S = A;
+	//cout << S << endl;
+	Matrix B(3, 3);
 	FillRand(B, 2, 3);
 	cout << B << endl;
-	Matrix C = A * B;
+	Matrix C =A * B;
 	cout << C << endl;
+    //cout << A.determinant() << endl;
 	//cout << (A != B) << endl;
 
 
@@ -198,118 +273,3 @@ void FillRand(Matrix& obj, int minrand, int maxrand)
 		for (int j = 0; j < obj.Get_cols(); j++) obj[i][j] = rand() % (maxrand-minrand)+minrand;
 	}
 }
-
-
-
-
-/*class Matrix
-{
-	int rows;
-	int cols;
-	int** arr;
-public:
-	int get_rows()const
-	{
-		return rows;
-	}
-	int get_cols()const
-	{
-		return cols;
-	}
-	//				Constructors:
-	Matrix(int rows = 2, int cols = 2)
-	{
-		this->rows = rows;
-		this->cols = cols;
-		this->arr = new int* [rows] {};
-		for (int i = 0; i < rows; i++)
-		{
-			arr[i] = new int[cols] {};
-		}
-		cout << "Constructor:\t" << this << endl;
-	}
-	Matrix(int n) :Matrix(1, n)
-	{
-
-	}
-	Matrix(const Matrix& other)//:Matrix(other.rows, other.cols)
-	{
-		/*for (int i = 0; i < rows; i++)
-		{
-			for (int j = 0; j < cols; j++)
-			{
-				this->arr[i][j] = other.arr[i][j];
-			}
-		}*/
-		/**this = other;
-		cout << "CopyConstructor:\t" << this << endl;
-	}
-	~Matrix()
-	{
-		for (int i = 0; i < rows; i++)
-		{
-			delete[] arr[i];
-		}
-		delete[] arr;
-		arr = nullptr;
-		rows = 0;
-		cols = 0;
-		cout << "Destructor:\t" << this << endl;
-	}
-
-	//				Operators:
-	Matrix& operator=(const Matrix& other)
-	{
-		if (this == &other)return *this;
-		this->~Matrix();
-		this->rows = other.rows;
-		this->cols = other.cols;
-		this->arr = new int* [rows] {};
-		for (int i = 0; i < rows; i++)
-		{
-			this->arr[i] = new int[cols] {};
-			memcpy(this->arr[i], other.arr[i], cols * sizeof(int));
-		}
-		cout << "CopyAssignment:\t" << this << endl;
-		return *this;
-	}
-	const int* operator[](int i)const
-	{
-		return arr[i];
-	}
-	int* operator[](int i)
-	{
-		return arr[i];
-	}
-
-	//				Methods:
-	void print()const
-	{
-		for (int i = 0; i < rows; i++)
-		{
-			for (int j = 0; j < cols; j++)
-			{
-				cout << arr[i][j] << "\t";
-			}
-			cout << endl;
-		}
-	}
-};
-
-void main()
-{
-	setlocale(LC_ALL, "Russin");
-	Matrix A(3, 4);
-	for (int i = 0; i < A.get_rows(); i++)
-	{
-		for (int j = 0; j < A.get_cols(); j++)
-		{
-			A[i][j] = rand() % 100;
-		}
-	}
-	A = A;
-	A.print();
-	Matrix B;
-	B = A;	//Copy assignment
-	B.print();
-}*/
